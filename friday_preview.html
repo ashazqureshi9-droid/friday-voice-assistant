@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Friday — quick preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e16;
+    --panel: #0f141e;
+    --line: #1c2433;
+    --accent: #3fe6cf;
+    --accent-dim: rgba(63, 230, 207, 0.35);
+    --text: #e8edf5;
+    --muted: #7c8aa0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .app {
+    max-width: 640px;
+    margin: 0 auto;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+  }
+  .app-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  .wordmark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .wordmark::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px 2px var(--accent-dim);
+  }
+  .subtitle {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 52ch;
+  }
+  .log {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 2px 12px;
+  }
+  .empty-state {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 24px 4px;
+  }
+  .msg {
+    max-width: 82%;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 10px 14px;
+    white-space: pre-wrap;
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: #17202e;
+    border-radius: 10px;
+  }
+  .msg.assistant {
+    align-self: flex-start;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+    color: var(--text);
+  }
+  .msg.thinking { color: var(--muted); }
+  .msg.thinking .dot {
+    display: inline-block;
+    animation: pulse 1.2s infinite ease-in-out;
+  }
+  .msg.thinking .dot:nth-child(2) { animation-delay: 0.15s; }
+  .msg.thinking .dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.25; }
+    40% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .msg.thinking .dot { animation: none; opacity: 0.6; }
+  }
+  .composer {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .composer input {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    outline: none;
+  }
+  .composer input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .composer input::placeholder { color: var(--muted); }
+  .composer button {
+    background: var(--accent);
+    color: #06231e;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 0 20px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .composer button:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+  }
+  .composer button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <div class="wordmark">Friday</div>
+      <p class="subtitle">Text-only preview of the brain — the real version on your PC listens, talks, and solves exact math with a calculator. This one just shows the personality and decision-making.</p>
+    </div>
+    <main class="log" id="log">
+      <div class="empty-state" id="empty-state">Try: "should I learn Python or JavaScript" or "what's the fastest way to learn guitar" — or just say hi.</div>
+    </main>
+    <form class="composer" id="composer">
+      <input id="input" type="text" placeholder="Ask Friday something…" autocomplete="off" aria-label="Message" />
+      <button type="submit" id="send-btn">Send</button>
+    </form>
+  </div>
+
+<script>
+  const PERSONALITY = "You are Friday, a witty, efficient, loyal AI assistant inspired by the Marvel movies. Keep answers concise and conversational -- 1 to 3 sentences unless the user clearly asks for more detail.";
+  const DECISION_PERSONALITY = "You are Friday, an AI decision-making assistant. The user will give you options and maybe some context. Briefly weigh the realistic factors involved (cost, time, risk, quality, practicality, and anything else relevant), then clearly recommend ONE option and say why, in 2 to 4 sentences. Be decisive, not wishy-washy.";
+  const DECISION_TRIGGERS = ["decide", "choose", "which is better", "compare", "pros and cons", "should i", "what should i pick", "recommend", "which one"];
+
+  // Get API key from environment or prompt user
+  let apiKey = localStorage.getItem('anthropic_api_key');
+
+  function looksLikeDecision(q) {
+    const lower = q.toLowerCase();
+    return DECISION_TRIGGERS.some(t => lower.includes(t));
+  }
+
+  async function askBrain(question) {
+    // Check if API key exists
+    if (!apiKey) {
+      apiKey = prompt('Enter your Anthropic API key (get one free at console.anthropic.com):\n\nThis will be stored locally in your browser only.');
+      if (!apiKey) {
+        return "No API key provided. Get a free key at console.anthropic.com and try again.";
+      }
+      localStorage.setItem('anthropic_api_key', apiKey);
+    }
+
+    const system = looksLikeDecision(question) ? DECISION_PERSONALITY : PERSONALITY;
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "claude-3-5-sonnet-20241022",
+          max_tokens: 1000,
+          system: system,
+          messages: [{ role: "user", content: question }]
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 401) {
+          localStorage.removeItem('anthropic_api_key');
+          apiKey = null;
+          return "Invalid API key. Please try again with a valid key from console.anthropic.com";
+        }
+        return `Error (${res.status}): ${errorData.error?.message || 'Unknown error'}`;
+      }
+
+      const data = await res.json();
+      const block = (data.content || []).find(b => b.type === "text");
+      return block ? block.text.trim() : "Hmm, I didn't get a response there -- try again?";
+    } catch (err) {
+      console.error('Error:', err);
+      return `Connection error: ${err.message}. Make sure you're online and try again.`;
+    }
+  }
+
+  const log = document.getElementById('log');
+  const form = document.getElementById('composer');
+  const input = document.getElementById('input');
+  const sendBtn = document.getElementById('send-btn');
+
+  function addMessage(text, who) {
+    const empty = document.getElementById('empty-state');
+    if (empty) empty.remove();
+    const el = document.createElement('div');
+    el.className = 'msg ' + who;
+    el.textContent = text;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    return el;
+  }
+
+  function addThinking() {
+    const empty = document.getElementById('empty-state');
+    if (empty) empty.remove();
+    const el = document.createElement('div');
+    el.className = 'msg assistant thinking';
+    el.innerHTML = '<span class="dot">●</span> <span class="dot">●</span> <span class="dot">●</span>';
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    return el;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    addMessage(text, 'user');
+    input.value = '';
+    sendBtn.disabled = true;
+
+    const thinkingEl = addThinking();
+    const answer = await askBrain(text);
+    thinkingEl.remove();
+    addMessage(answer, 'assistant');
+
+    sendBtn.disabled = false;
+    input.focus();
+  });
+
+  // Show setup info on load
+  window.addEventListener('load', () => {
+    if (!localStorage.getItem('anthropic_api_key')) {
+      console.log('Friday Preview: No API key found. You\'ll be prompted to enter one on first message.');
+    }
+  });
+</script>
+</body>
+</html>
