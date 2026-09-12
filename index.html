@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRIDAY - Voice Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <h1>FRIDAY</h1>
+                <p class="tagline">Your AI Voice Assistant</p>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Offline</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Chat Display -->
+            <section class="chat-section">
+                <div class="chat-window" id="chatWindow">
+                    <div class="welcome-message">
+                        <h2>Welcome to FRIDAY</h2>
+                        <p>Click "Start Listening" or say "Hey Friday" to begin</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <div class="input-section">
+                    <textarea 
+                        id="userInput" 
+                        class="input-box" 
+                        placeholder="Type your question here or use voice input..."
+                        rows="3"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button id="listenBtn" class="btn btn-primary" title="Start listening for commands">
+                        🎤 Start Listening
+                    </button>
+                    <button id="sendBtn" class="btn btn-secondary" title="Send text input">
+                        Send
+                    </button>
+                    <button id="stopBtn" class="btn btn-danger" title="Stop listening">
+                        ⏹ Stop
+                    </button>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="quick-actions">
+                    <button class="quick-btn" data-action="pattern">📊 Find Pattern</button>
+                    <button class="quick-btn" data-action="pi">π Calculate Pi</button>
+                    <button class="quick-btn" data-action="decide">⚖️ Help Decide</button>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section">
+                <div class="feature-card">
+                    <h3>💬 Conversation</h3>
+                    <p>Ask questions and get intelligent responses powered by AI</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔢 Pattern Finder</h3>
+                    <p>Discover patterns in number sequences and predict the next value</p>
+                </div>
+                <div class="feature-card">
+                    <h3>π Math Master</h3>
+                    <p>Get exact digits of pi and solve mathematical problems</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚖️ Decision Helper</h3>
+                    <p>Use weighted scoring to compare options and make smart choices</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Powered by Ollama • Voice Recognition • Local AI</p>
+        </footer>
+    </div>
+
+    <!-- Pattern Finder Modal -->
+    <div id="patternModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Find Number Pattern</h2>
+            <p>Enter a sequence of numbers separated by commas:</p>
+            <input type="text" id="patternInput" placeholder="e.g., 2, 4, 6, 8" class="modal-input">
+            <button id="analyzePatternBtn" class="btn btn-primary">Analyze</button>
+            <div id="patternResult"></div>
+        </div>
+    </div>
+
+    <!-- Pi Calculator Modal -->
+    <div id="piModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Calculate Pi Digits</h2>
+            <p>How many decimal places do you want?</p>
+            <input type="number" id="piDigits" placeholder="20" min="1" max="500" value="20" class="modal-input">
+            <button id="calculatePiBtn" class="btn btn-primary">Calculate</button>
+            <div id="piResult"></div>
+        </div>
+    </div>
+
+    <!-- Decision Helper Modal -->
+    <div id="decideModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Decision Helper</h2>
+            <div id="decideStep1">
+                <p>Step 1: What are your options? (comma-separated)</p>
+                <input type="text" id="optionsInput" placeholder="e.g., Option A, Option B, Option C" class="modal-input">
+                <button id="nextStep1Btn" class="btn btn-primary">Next</button>
+            </div>
+            <div id="decideStep2" style="display:none;">
+                <p>Step 2: What factors matter? (comma-separated)</p>
+                <input type="text" id="criteriaInput" placeholder="e.g., Cost, Speed, Quality" class="modal-input">
+                <button id="nextStep2Btn" class="btn btn-primary">Next</button>
+            </div>
+            <div id="decideStep3" style="display:none;">
+                <p>Step 3: Rate your options</p>
+                <div id="ratingContainer"></div>
+                <button id="calculateDecisionBtn" class="btn btn-primary">Calculate Best Option</button>
+            </div>
+            <div id="decideResult"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
